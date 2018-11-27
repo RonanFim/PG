@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/protobuf/duration.proto";
+
+package is;
+
+message RobotParameters {
+    int64 id = 1;
+    string robot_uri = 2;
+    // Maximum duration that a speed command can be executed 
+    google.protobuf.Duration speed_hold_limit = 3;
+    // Sensors sampling rate
+    float sampling_rate = 4;
+}
+
+message RobotGatewayOptions {
+    string broker_uri = 1;
+    string zipkin_uri = 2;
+    RobotParameters robot_parameters = 3;
+}

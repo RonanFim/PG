@@ -1,0 +1,18 @@
+
+syntax = "proto3";
+
+message Odometry {
+    int32 pos_x = 1;
+    int32 pos_y = 2;
+    int32 heading = 3;
+    int32 vel_linear = 4;
+    int32 vel_angular = 5;
+    uint32 dist_US_Frente = 6;
+    uint32 dist_US_Direito = 7;
+    uint32 dist_US_Esquerdo = 8;
+}
+
+message PIDs {
+    int32 velLin = 1;
+    int32 velAng = 2;
+}
