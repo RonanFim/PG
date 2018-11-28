@@ -1,6 +1,7 @@
 
 from is_wire.core import Channel, Message, Logger
 from is_msgs.robot_pb2 import RobotConfig
+from google.protobuf.empty_pb2 import Empty
 from driver import ATSPdriver
 from time import time
 import options_pb2
@@ -20,13 +21,13 @@ class ATSPgateway:
 
     # Chamada pelo ServiceProvider, cria um objeto RobotConfig, preenche
     # com a velocidade do robo e retorna o objeto
-    def get_configuration(self):
+    def get_configuration(self, msg, ctx):
         self.config = RobotConfig()
         self.config.speed = self.driver.get_speed()
         return self.config
 
     # Chamada pelo ServiceProvider, envia um comando de velocidade ao robo
-    def set_configuration(self, robot_conf):
+    def set_configuration(self, robot_conf, ctx):
         if robot_conf.HasField("speed"):
             self.driver.set_speed(robot_conf.speed)
         return Empty()
