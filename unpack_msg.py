@@ -1,4 +1,11 @@
 
+# Antes de rodar o service.py, executar os comandos na Raspberry:
+# To stop getty:
+# sudo systemctl stop serial-getty@ttyAMA0.service
+
+# Problemas de permissao:
+# sudo chmod a+rw /dev/ttyAMA0
+
 from is_wire.core import Channel, Message, Subscription, Logger
 from google.protobuf.json_format import Parse
 from is_msgs.robot_pb2 import RangeScan, RobotConfig
@@ -33,10 +40,12 @@ def load_options():
 
     return op
 
+
+
 # Carrega parametros do robo e endereco do broker do arquivo Json
 op_config = load_options()
 
-ATSPlog = Logger(name='ATSP')
+ATSPlog = Logger(name='unpack')
 
 service_name = "RobotGateway.{}".format(op_config.robot_parameters.id)
 sonar_topic = "RobotGateway.{}.SonarScan".format(op_config.robot_parameters.id)
@@ -49,74 +58,76 @@ ATSPlog.info("event=ChannelInitDone")
 
 # Inscreve nos topicos que deseja receber mensagem
 subscription = Subscription(channel)
-# subscription.subscribe(pose_topic)
-# subscription.subscribe(sonar_topic)
+subscription.subscribe(pose_topic)
+subscription.subscribe(sonar_topic)
+ATSPlog.info("SubscriptionsDone")
 
 
-# config = RobotConfig()
-# config.speed.linear = 1.2
-# config.speed.angular = 1.0
-# set_req = Message(content=config, reply_to=subscription)
-# channel.publish(topic=service_name + ".SetConfig", message=set_req)
+# Envia mensagem de getConfig
+get_req = Message(reply_to=subscription)
+# Salva correlation_id do request
+cor_id = get_req.correlation_id
+# print("cor_id: ", cor_id)
+# Broadcast message to anyone interested (subscribed)
+channel.publish(message=get_req, topic=service_name + ".GetConfig")
 
-
-# get_req = Message(reply_to=subscription)
-# # Broadcast message to anyone interested (subscribed)
-# channel.publish(message=get_req, topic=service_name + ".GetConfig")
-# ATSPlog.info("Publicou!")
+# Envia msg de setConfig
+config = RobotConfig()
+config.speed.linear = 7.5
+config.speed.angular = 0.8
+set_req = Message(content=config, reply_to=subscription)
+# Broadcast message to anyone interested (subscribed)
+channel.publish(topic=service_name + ".SetConfig", message=set_req)
 
 
 while 1:
 
-    config = RobotConfig()
-    config.speed.linear = 1.2
-    config.speed.angular = 1.0
-    set_req = Message(content=config, reply_to=subscription)
-    # Broadcast message to anyone interested (subscribed)
-    channel.publish(topic=service_name + ".SetConfig", message=set_req)
-
-    get_req = Message(reply_to=subscription)
-    # Broadcast message to anyone interested (subscribed)
-    channel.publish(message=get_req, topic=service_name + ".GetConfig")
-
-
     # Verifica se chegou alguma mensagem nos topicos inscritos
-    # message = channel.consume()
+    message = channel.consume()
 
-    # print("get: ", message.status, message.unpack(RobotConfig))
-    #print("set: ", message.status)
 
-    # # Se for uma mensagem de ultrassom...
-    # if message.topic == sonar_topic:
-    #     scan = message.unpack(RangeScan) # desserializa
+    # Se for uma mensagem retornada do get_configuration...
+    # Apenas mensagens vindas de RPC possuem correlation_id
+    if message.has_correlation_id():
+        if message.correlation_id == cor_id: # Mensagem retornada do get config
+            # print("correlation: ", message.correlation_id)
+            ATSPlog.info("get_config")
+            robconf = message.unpack(RobotConfig) # desserializa
+            # print("Vel linear: ", robconf.speed.linear)
+            # print("Vel angular: ", robconf.speed.angular)
+
+            # Envia mensagem de getConfig
+            get_req = Message(reply_to=subscription)
+            # Salva correlation_id do request
+            cor_id = get_req.correlation_id
+            # print("cor_id: ", cor_id)
+            # Broadcast message to anyone interested (subscribed)
+            channel.publish(message=get_req, topic=service_name + ".GetConfig")
+
+
+    # Se for uma mensagem de ultrassom...
+    if message.topic == sonar_topic:
+        scan = message.unpack(RangeScan) # desserializa
     #     for num in range(3):
     #         print(scan.angles[num],"   ",scan.ranges[num])
 
-    # # Se for uma mensagem de odometria...
-    # if message.topic == pose_topic:
-    #     pos = message.unpack(Pose) # desserializa
-    #     print("pos x: ", pos.position.x)
-    #     print("pos y: ", pos.position.y)
-    #     print("orient: ", pos.orientation.roll)
+    # Se for uma mensagem de odometria...
+    if message.topic == pose_topic:
+        ATSPlog.info("odometria")
+        pos = message.unpack(Pose) # desserializa
+        # print("pos x: ", pos.position.x)
+        # print("pos y: ", pos.position.y)
+        # print("orient: ", pos.orientation.roll)
 
-    # if message.topic == service_name + ".GetConfig":
-    #     robconf = message.unpack(RobotConfig) # desserializa
-    #     print("Vel linear: ", robconf.speed.linear)
-    #     print("Vel angular: ", robconf.speed.angular)
+        # Envia msg de setConfig
+        config = RobotConfig()
+        config.speed.linear = 7.5
+        config.speed.angular = 0.8
+        set_req = Message(content=config, reply_to=subscription)
+        # Broadcast message to anyone interested (subscribed)
+        channel.publish(topic=service_name + ".SetConfig", message=set_req)
+
     
     # print(" ")
 
-    time.sleep(1)
-
-
-# config = RobotConfig()
-#     config.speed.linear = -0.2
-#     set_req = Message(content=config, reply_to=subscription)
-#     channel.publish(topic="RobotGateway.{}.SetConfig".format(rid), message=set_req)
-#     set_rep = channel.consume(timeout=0.05)
-# print("set:", set_rep.status)
-
-# get_req = Message(reply_to=subscription)
-#     channel.publish(topic="RobotGateway.{}.GetConfig".format(rid), message=get_req)
-#     get_rep = channel.consume(timeout=0.05)
-# print("get:", get_rep.status, get_rep.unpack(RobotConfig))
+    # time.sleep(0.075)

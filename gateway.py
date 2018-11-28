@@ -6,6 +6,7 @@ from driver import ATSPdriver
 from time import time
 import options_pb2
 
+
 class ATSPgateway:
 
     def __init__(self, channel, driver, robot_par):
@@ -17,13 +18,19 @@ class ATSPgateway:
         self.last_sampling = now
         self.sonar_topic = "RobotGateway.{}.SonarScan"
         self.pose_topic = "RobotGateway.{}.Pose"
+        self.log = Logger(name="gatewayLog")
 
 
     # Chamada pelo ServiceProvider, cria um objeto RobotConfig, preenche
     # com a velocidade do robo e retorna o objeto
     def get_configuration(self, msg, ctx):
         self.config = RobotConfig()
-        self.config.speed = self.driver.get_speed()
+        #self.config.speed = self.driver.get_speed()
+        #self.log.info("Pediu velocidade")
+        spd = self.driver.get_speed()
+        #self.log.info("Recebeu velocidade")
+        self.config.speed.linear = spd.linear
+        self.config.speed.angular = spd.angular
         return self.config
 
     # Chamada pelo ServiceProvider, envia um comando de velocidade ao robo
