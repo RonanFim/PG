@@ -11,9 +11,10 @@ import socket
 from driver import ATSPdriver
 from gateway import ATSPgateway
 
-
+# Logger para imprimir mensagens
 ATSPlog = Logger(name="ATSPlog")
 
+# Carrega parametros do robo e endereco do broker do arquivo Json
 def load_options():
     log = Logger(name='LoadOptions')
     op_file = sys.argv[1] if len(sys.argv) > 1 else 'options.json'
@@ -39,39 +40,51 @@ def load_options():
 
     return op
 
+# Carrega parametros do robo e endereco do broker do arquivo Json
 op_config = load_options()
 
-service_name = "ATSP"
+service_name = "RobotGateway.{}".format(op_config.robot_parameters.id)
 
+# instancia driver passando a porta serial
 driver = ATSPdriver(op_config.robot_parameters.robot_uri)
 ATSPlog.info("event=RobotInitDone")
 
+# instania channel passando endereco do broker
+# estabelece conexao com o broker
 channel = Channel(op_config.broker_uri)
 ATSPlog.info("event=ChannelInitDone")
 
+# instancia gateway passando o channel e o driver criados, alem dos parametros do robo
 gateway = ATSPgateway(channel=channel, driver=driver, robot_par=op_config.robot_parameters)
 
+# Cria o ServiceProvider passando o channel
 server = ServiceProvider(channel)
 
 logs = LogInterceptor()  # Log requests to console
 server.add_interceptor(logs)
 
+# Linka cada tipo de mensagem recebida a um metodo do gateway
 server.delegate(topic=service_name + ".GetConfig", request_type=Empty, reply_type=RobotConfig, function=gateway.get_configuration)
 server.delegate(topic=service_name + ".SetConfig", request_type=RobotConfig, reply_type=Empty, function=gateway.set_configuration)
 
 ATSPlog.info("event=InitAllDone")
 
-# print(gateway.next_deadline())
-# print(time())
+
 while(1):
     try:
-        #ATSPlog.info("consume 1!")
+        # Espera receber uma mensagem no canal dentro de um timeout
         message = channel.consume(timeout=max(gateway.next_deadline()-time(),0))
-        #ATSPlog.info("Passou pelo consume!")
+        # Verifica se essa mensagem esta dentro dos delegates
         if server.should_serve(message):
-            server.serve(message)
-        #ATSPlog.info("Dei run!")
+            server.serve(message) # Executa o pedido da mensagem
     except socket.timeout:
-        # ATSPlog.info("timeout!")
         pass
+
+    # Publica os sensores
     gateway.run()
+
+
+# Exemplo de uso do Logger:
+# >>> from is_wire.core import Logger
+# >>> log = Logger(name="Ronan")
+# >>> log.info("vel={:.2f}", 32.0320909)
