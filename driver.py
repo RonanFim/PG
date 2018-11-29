@@ -56,8 +56,10 @@ class ATSPdriver:
         rx_buf.clear()
         self.pckin.ParseFromString(sin)
 
-        self.pos.position.x = self.pckin.pos_x/1000.0
-        self.pos.position.y = self.pckin.pos_y/1000.0
+        # self.pos.position.x = self.pckin.pos_x/1000.0
+        # self.pos.position.y = self.pckin.pos_y/1000.0
+        self.pos.position.x = self.pckin.pos_x
+        self.pos.position.y = self.pckin.pos_y
         self.pos.orientation.roll = self.pckin.heading/1000.0
         self.ultsom.ranges.append(self.pckin.dist_US_Esquerdo)
         self.ultsom.ranges.append(self.pckin.dist_US_Frente)
@@ -66,7 +68,7 @@ class ATSPdriver:
         self.sp_rec.angular = (self.pckin.vel_angular/1000.0)*3.14/180
 
     def stop(self):
-        self.sp.linear = 0.001
+        self.sp.linear = 0.0
         self.sp.angular = 0.001
         self.send_speed()
 

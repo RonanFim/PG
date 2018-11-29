@@ -1,0 +1,37 @@
+
+Placa interface com ESP:
+*olhando com os 8 conectores para baixo*
+
+	A - - C
+	B - - -
+
+A= GND - Liga no pino 6 do Raspberry (Azul)
+B= RX do Arduino e TX da Raspberry - Liga no pino 8 da RPi (Branco)
+C= TX do Arduino e Rx da Raspberry - Liga no pino 10 da RPi (Marrom)
+
+Placa Raspberry Pi:
+*olhando com os USBs para baixo, pinos a direita*
+
+	- G
+	- -
+	- H
+	- E
+	D F
+	- -
+	...
+	...
+
+D= Pino 9 - GND da Raspberry (Azul)
+E= Pino 8 - Tx da Raspberry (Branco)
+F= Pino 10 - Rx da Raspberry (Marrom)
+
+Identificação do chicote:
+O lado que tem um metal aparecendo é o pino F (pino 10)
+
+Alimentação:
+
+G= +5V - Fio Branco
+H= GND - Fio Verde
+
+Orientação do chicote: Fio branco para cima
+

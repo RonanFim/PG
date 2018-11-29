@@ -32,22 +32,24 @@ print("Inicio!")
 
 sleep(1)
 
-sp.linear = 10
-sp.angular = 1.5
+sp.linear = 100.0
+sp.angular = 0.0
+
+robo.set_speed(sp)
 
 for x in range(150):
 
     sleep(0.075)
     
-    ps = robo.get_pose()
-    print("pos_x: ",ps.position.x)
-    print("pos_y: ",ps.position.y)
-    print("heading: ",ps.orientation.roll)
+    # ps = robo.get_pose()
+    # print("pos_x: ",ps.position.x)
+    # print("pos_y: ",ps.position.y)
+    # print("heading: ",ps.orientation.roll)
 
-    rs = robo.get_sonar_scan()
-    print("esquerda: ",rs.ranges[0])
-    print("meio: ",rs.ranges[1])
-    print("direita: ",rs.ranges[2])
+    # rs = robo.get_sonar_scan()
+    # print("esquerda: ",rs.ranges[0])
+    # print("meio: ",rs.ranges[1])
+    # print("direita: ",rs.ranges[2])
 
     sp2 = robo.get_speed()
     print("linear: ",sp2.linear)
@@ -55,9 +57,9 @@ for x in range(150):
 
     print(" ")
 
-    robo.set_speed(sp)
-    sp.linear += 0.005
-    sp.angular += 0.0005
+    # robo.set_speed(sp)
+    # sp.linear += 0.005
+    # sp.angular += 0.0005
 
 robo.stop()
 

@@ -60,8 +60,8 @@ gateway = ATSPgateway(channel=channel, driver=driver, robot_par=op_config.robot_
 # Cria o ServiceProvider passando o channel
 server = ServiceProvider(channel)
 
-# logs = LogInterceptor()  # Log requests to console
-# server.add_interceptor(logs)
+logs = LogInterceptor()  # Log requests to console
+server.add_interceptor(logs)
 
 # Linka cada tipo de mensagem recebida a um metodo do gateway
 server.delegate(topic=service_name + ".GetConfig", request_type=Empty, reply_type=RobotConfig, function=gateway.get_configuration)

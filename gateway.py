@@ -1,6 +1,7 @@
 
 from is_wire.core import Channel, Message, Logger
 from is_msgs.robot_pb2 import RobotConfig
+from is_msgs.common_pb2 import Speed
 from google.protobuf.empty_pb2 import Empty
 from driver import ATSPdriver
 from time import time
@@ -29,14 +30,17 @@ class ATSPgateway:
         #self.log.info("Pediu velocidade")
         spd = self.driver.get_speed()
         #self.log.info("Recebeu velocidade")
-        self.config.speed.linear = spd.linear
+        self.config.speed.linear = spd.linear/1000
         self.config.speed.angular = spd.angular
         return self.config
 
     # Chamada pelo ServiceProvider, envia um comando de velocidade ao robo
     def set_configuration(self, robot_conf, ctx):
         if robot_conf.HasField("speed"):
-            self.driver.set_speed(robot_conf.speed)
+            sp = Speed()
+            sp.linear = robot_conf.speed.linear*1000
+            sp.angular = robot_conf.speed.angular
+            self.driver.set_speed(sp)
         return Empty()
 
     # def enforce_safety(self):
