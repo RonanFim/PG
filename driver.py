@@ -77,9 +77,12 @@ class ATSPdriver:
         return self.sp_rec
 
     def set_speed(self, sp_new):
-        self.sp.linear = sp_new.linear
-        self.sp.angular = sp_new.angular
-        self.send_speed()
+        if sp_new.linear==0 and sp_new.angular==0:
+            self.stop()
+        else:
+            self.sp.linear = sp_new.linear
+            self.sp.angular = sp_new.angular
+            self.send_speed()
 
     def get_pose(self):
         self.get_odometry()
