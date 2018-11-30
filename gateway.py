@@ -26,11 +26,10 @@ class ATSPgateway:
     # com a velocidade do robo e retorna o objeto
     def get_configuration(self, msg, ctx):
         self.config = RobotConfig()
-        #self.config.speed = self.driver.get_speed()
         #self.log.info("Pediu velocidade")
         spd = self.driver.get_speed()
         #self.log.info("Recebeu velocidade")
-        self.config.speed.linear = spd.linear/1000
+        self.config.speed.linear = spd.linear
         self.config.speed.angular = spd.angular
         return self.config
 
@@ -38,7 +37,7 @@ class ATSPgateway:
     def set_configuration(self, robot_conf, ctx):
         if robot_conf.HasField("speed"):
             sp = Speed()
-            sp.linear = robot_conf.speed.linear*1000
+            sp.linear = robot_conf.speed.linear
             sp.angular = robot_conf.speed.angular
             self.driver.set_speed(sp)
         return Empty()
@@ -56,15 +55,15 @@ class ATSPgateway:
             # obtem valores do sensor ultrassom e publica a mensagem.
             # Quem estiver inscrito naquele topico em que a mensagem foi
             # publicada, vai recebe-la
-            sonar_scan = self.driver.get_sonar_scan()
-            if (sonar_scan):
-                self.channel.publish(Message(content=sonar_scan), topic=self.sonar_topic.format(self.param.id))
+            #sonar_scan = self.driver.get_sonar_scan()
+            #if (sonar_scan):
+            #    self.channel.publish(Message(content=sonar_scan), topic=self.sonar_topic.format(self.param.id))
             # obtem valores da odometria e publica a mensagem.
             # Quem estiver inscrito naquele topico em que a mensagem foi
             # publicada, vai recebe-la
-            pose = self.driver.get_pose()
-            if (pose):
-                self.channel.publish(Message(content=pose), topic=self.pose_topic.format(self.param.id))
+            #pose = self.driver.get_pose()
+            #if (pose):
+            #    self.channel.publish(Message(content=pose), topic=self.pose_topic.format(self.param.id))
             # Atualiza tempo, somando periodo de amostragem
             self.last_sampling += 1/self.param.sampling_rate
 

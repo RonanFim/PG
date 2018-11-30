@@ -29,8 +29,8 @@ class ATSPdriver:
        
 
     def send_speed(self):
-        self.pckout.velLin = (int)(self.sp.linear*1000)
-        self.pckout.velAng = (int)(self.sp.angular*1000)
+        self.pckout.velLin = (int)(self.sp.linear*1000000) # *1000 do float e *1000 da conversao m para mm
+        self.pckout.velAng = (int)(self.sp.angular*1000) # *1000 do float
         tx_buf = self.pckout.SerializeToString()
         # Envia pela serial
         self.ser.write(b'#')
@@ -56,15 +56,13 @@ class ATSPdriver:
         rx_buf.clear()
         self.pckin.ParseFromString(sin)
 
-        # self.pos.position.x = self.pckin.pos_x/1000.0
-        # self.pos.position.y = self.pckin.pos_y/1000.0
-        self.pos.position.x = self.pckin.pos_x
-        self.pos.position.y = self.pckin.pos_y
+        self.pos.position.x = self.pckin.pos_x/1000000.0    # /1000 do float e /1000 da conversao mm para m
+        self.pos.position.y = self.pckin.pos_y/1000000.0    # /1000 do float e /1000 da conversao mm para m
         self.pos.orientation.roll = self.pckin.heading/1000.0
         self.ultsom.ranges.append(self.pckin.dist_US_Esquerdo)
         self.ultsom.ranges.append(self.pckin.dist_US_Frente)
         self.ultsom.ranges.append(self.pckin.dist_US_Direito)
-        self.sp_rec.linear = self.pckin.vel_linear/1000.0
+        self.sp_rec.linear = self.pckin.vel_linear/1000000.0    # /1000 do float e /1000 da conversao mm para m
         self.sp_rec.angular = (self.pckin.vel_angular/1000.0)*3.14/180
 
     def stop(self):

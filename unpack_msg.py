@@ -73,7 +73,7 @@ channel.publish(message=get_req, topic=service_name + ".GetConfig")
 
 # Envia msg de setConfig
 config = RobotConfig()
-config.speed.linear = 1.5
+config.speed.linear = 0.5
 config.speed.angular = 0.0
 set_req = Message(content=config, reply_to=subscription)
 # Broadcast message to anyone interested (subscribed)
