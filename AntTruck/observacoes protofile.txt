@@ -1,0 +1,2 @@
+Foi necessário utilizar fixed64 no lugar de double nos protofiles porque o double
+tinha tamanho 4 bytes e o nanopb exige 8.
